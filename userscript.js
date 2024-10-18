@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GeoFS Failures
-// @version      0.1
+// @version      0.1.1
 // @description  Adds the ability for systems to fail
 // @author       GGamerGGuy
 // @match        https://www.geo-fs.com/geofs.php?v=*
@@ -327,6 +327,7 @@ window.openFailuresMenu = function() {
         window.failuresMenu.style.background = "white";
         window.failuresMenu.style.display = "block";
         window.failuresMenu.style.overflow = "scroll";
+        window.failuresMenu.style.zIndex = "10000";
         window.failuresMenu.id = "failMenu";
         window.failuresMenu.className = "geofs-ui-left";
         document.body.appendChild(window.failuresMenu);
@@ -760,6 +761,7 @@ window.mainFailureFunction = function() {
     window.failBtn.style.color = 'white';
     window.failBtn.style.fontWeight = '600';
     window.failBtn.style.cursor = 'pointer';
+    window.failBtn.style.zIndex = "10000";
     document.body.appendChild(window.failBtn);
     window.failBtn.innerHTML = `<button style="position: inherit; right: inherit; padding: inherit; top: inherit; border: inherit; background: inherit; color: inherit; font-weight: inherit; cursor: inherit;" onclick="window.openFailuresMenu()">FAILURES</button>`;
     /*
