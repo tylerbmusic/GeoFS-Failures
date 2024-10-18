@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GeoFS Failures
-// @version      0.1.1
+// @version      0.1.2
 // @description  Adds the ability for systems to fail
 // @author       GGamerGGuy
 // @match        https://www.geo-fs.com/geofs.php?v=*
@@ -414,7 +414,7 @@ window.openFailuresMenu = function() {
     <input disabled="true;" id="inputElevator" style="
     width: 40px;
 ">
-        <button onclick="failure.fail('elevator')">FAIL</button><br>
+        <button onclick="failure.fail('elevators')">FAIL</button><br>
         <h2>Rudder</h2>
         <span style="
     font-size: large;
@@ -506,7 +506,7 @@ window.openFailuresMenu = function() {
         <input disabled="true;" id="inputPressurization" style="
     width: 40px;
 ">
-        <button onclick="failure.fail('spoilers')">FAIL</button>
+        <button onclick="failure.fail('pressurization')">FAIL</button>
         <h1>Engines</h1>
         `;
         for (var i = 0; i < geofs.aircraft.instance.engines.length; i++) {
@@ -634,7 +634,7 @@ window.openFailuresMenu = function() {
     <input disabled="true;" id="inputElevator" style="
     width: 40px;
 ">
-        <button onclick="failure.fail('elevator')">FAIL</button><br>
+        <button onclick="failure.fail('elevators')">FAIL</button><br>
         <h2>Rudder</h2>
         <span style="
     font-size: large;
@@ -726,7 +726,7 @@ window.openFailuresMenu = function() {
         <input disabled="true;" id="inputPressurization" style="
     width: 40px;
 ">
-        <button onclick="failure.fail('spoilers')">FAIL</button>
+        <button onclick="failure.fail('pressurization')">FAIL</button>
         <h1>Engines</h1>
         `;
             for (i = 0; i < geofs.aircraft.instance.engines.length; i++) {
