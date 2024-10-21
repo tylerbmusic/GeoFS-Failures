@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GeoFS Failures
-// @version      0.1.2
+// @version      0.2
 // @description  Adds the ability for systems to fail
 // @author       GGamerGGuy
 // @match        https://www.geo-fs.com/geofs.php?v=*
@@ -10,7 +10,7 @@
 // ==/UserScript==
 class Failure {
         constructor() {
-            this.aId = geofs.aircraft.instance.id; //aircraft ID
+            this.aId = window.geofs.aircraft.instance.id; //aircraft ID
             this.enabled = false; //Start disabled
             this.failures = []; //Array with all failure intervals
             this.fails = {
@@ -36,7 +36,7 @@ class Failure {
                 pressurization: false,
                 engines: []
             } //End fails
-            for (var i = 0; i < geofs.aircraft.instance.engines.length; i++) {
+            for (var i = 0; i < window.geofs.aircraft.instance.engines.length; i++) {
                 this.fails.engines.push({i: false});
             }
             this.chances = { //Chances of a failure happening every minute, from 0 to 1
@@ -62,37 +62,37 @@ class Failure {
                 pressurization: 0,
                 engines: []
             } //End chances
-            for (var v = 0; v < geofs.aircraft.instance.engines.length; v++) {
+            for (var v = 0; v < window.geofs.aircraft.instance.engines.length; v++) {
                 this.chances.engines.push({v: 0});
             }
         } //End constructor
 
         fail(system) {
-            var ngin_l = geofs.aircraft.instance.engines.length; //N-Gin Length
+            var ngin_l = window.geofs.aircraft.instance.engines.length; //N-Gin Length
             //Engine (first because the number varies):
-            //Left:  geofs.aircraft.instance.definition.parts[79].thrust = 0;
-            //Right: geofs.aircraft.instance.definition.parts[82].thrust = 0;
+            //Left:  window.geofs.aircraft.instance.definition.parts[79].thrust = 0;
+            //Right: window.geofs.aircraft.instance.definition.parts[82].thrust = 0;
             for (var i = 0; i < ngin_l; i++) {
                 if (system == ("engine" + i)) {
                     alert("Engine " + (i+1) + " failed!");
-                    geofs.aircraft.instance.engines[i].thrust = 0;
-                    var v = new geofs.fx.ParticleEmitter({
+                    window.geofs.aircraft.instance.engines[i].thrust = 0;
+                    var v = new window.geofs.fx.ParticleEmitter({
                         off: 0,
-                        anchor: {worldPosition: geofs.aircraft.instance.engines[0].object3d.worldPosition},
+                        anchor: window.geofs.aircraft.instance.engines[0].points.contrailAnchor || {worldPosition: window.geofs.aircraft.instance.engines[0].object3d.worldPosition},
                         duration: 1E10,
-                        rate: .05,
-                        life: 1E10, //10 seconds
+                        rate: .03,
+                        life: 1E4, //10 seconds
                         easing: "easeOutQuart",
                         startScale: .01,
-                        endScale: 1,
+                        endScale: .2,
                         randomizeStartScale: .01,
                         randomizeEndScale: .15,
                         startOpacity: 1,
-                        endOpacity: 1,
+                        endOpacity: .2,
                         startRotation: "random",
                         texture: "whitesmoke"
                     });
-                    var p = setInterval(() => {geofs.fx.setParticlesColor(new Cesium.Color(0.5,0.25,0,1));},20);
+                    var p = setInterval(() => {window.geofs.fx.setParticlesColor(new Cesium.Color(0.25,0.25,0.25,1));},20);
                 }
             }
             if (!system.includes("engine")) {
@@ -104,7 +104,7 @@ class Failure {
                             this.fails.fuelLeak = true;
                             setTimeout(() => {
                                 setInterval(() => {
-                                    geofs.aircraft.instance.stopEngine();
+                                    window.geofs.aircraft.instance.stopEngine();
                                 },1000);
                             },120000); //2 minutes = 120000 ms
                         }
@@ -116,13 +116,13 @@ class Failure {
                             alert("Nose gear failure");
                             this.fails.landingGear.front = true;
                             var fG = 2;
-                            for (z = 0; z < geofs.aircraft.instance.suspensions.length; z++) {
-                                if (geofs.aircraft.instance.suspensions[i].name.includes("front") || geofs.aircraft.instance.suspensions[i].name.includes("nose") || geofs.aircraft.instance.suspensions[i].name.includes("tail")) {
+                            for (z = 0; z < window.geofs.aircraft.instance.suspensions.length; z++) {
+                                if (window.geofs.aircraft.instance.suspensions[i].name.includes("front") || window.geofs.aircraft.instance.suspensions[i].name.includes("nose") || window.geofs.aircraft.instance.suspensions[i].name.includes("tail")) {
                                     fG = i;
                                 }
                             }
                             this.failures.push(setInterval(() => {
-                                geofs.aircraft.instance.suspensions[fG].collisionPoints[0][2] = 30;
+                                window.geofs.aircraft.instance.suspensions[fG].collisionPoints[0][2] = 30;
                             }),1000);
                         }
                         break;
@@ -132,13 +132,13 @@ class Failure {
                             alert("Left gear failure");
                             this.fails.landingGear.left = true;
                             var lG = 0;
-                            for (z = 0; z < geofs.aircraft.instance.suspensions.length; z++) {
-                                if (geofs.aircraft.instance.suspensions[i].name.includes("left") || geofs.aircraft.instance.suspensions[i].name.includes("l")) {
+                            for (z = 0; z < window.geofs.aircraft.instance.suspensions.length; z++) {
+                                if (window.geofs.aircraft.instance.suspensions[i].name.includes("left") || window.geofs.aircraft.instance.suspensions[i].name.includes("l")) {
                                     lG = i;
                                 }
                             }
                             this.failures.push(setInterval(() => {
-                                geofs.aircraft.instance.suspensions[lG].collisionPoints[0][2] = 30;
+                                window.geofs.aircraft.instance.suspensions[lG].collisionPoints[0][2] = 30;
                             }),1000);
                         }
                         break;
@@ -148,43 +148,43 @@ class Failure {
                         if (!this.fails.landingGear.right) {
                             this.fails.landingGear.right = true;
                             var rG = 1;
-                            for (z = 0; z < geofs.aircraft.instance.suspensions.length; z++) {
-                                if (geofs.aircraft.instance.suspensions[i].name.includes("right") || geofs.aircraft.instance.suspensions[i].name.includes("r_g")) {
+                            for (z = 0; z < window.geofs.aircraft.instance.suspensions.length; z++) {
+                                if (window.geofs.aircraft.instance.suspensions[i].name.includes("right") || window.geofs.aircraft.instance.suspensions[i].name.includes("r_g")) {
                                     rG = i;
                                 }
                             }
                             this.failures.push(setInterval(() => {
-                                geofs.aircraft.instance.suspensions[rG].collisionPoints[0][2] = 30;
+                                window.geofs.aircraft.instance.suspensions[rG].collisionPoints[0][2] = 30;
                             }),1000);
                         }
                         break;
 
                         //Flight control:
-                        //Left aileron: geofs.aircraft.instance.definition.parts[6].object3d._scale = [0,0,0];
-                        //Right aileron: geofs.aircraft.instance.definition.parts[29].object3d._scale = [0,0,0];
+                        //Left aileron: window.geofs.aircraft.instance.definition.parts[6].object3d._scale = [0,0,0];
+                        //Right aileron: window.geofs.aircraft.instance.definition.parts[29].object3d._scale = [0,0,0];
                     case "ailerons":
                         alert("Flight control failure (ailerons)");
                         if (!this.fails.flightCtrl.ailerons) {
                             this.fails.flightCtrl.ailerons = true;
                             this.failures.push(setInterval(() => {
-                                for (var t in geofs.aircraft.instance.airfoils) {
-                                    if (geofs.aircraft.instance.airfoils[t].name.toLowerCase().includes("aileron")) {
-                                        geofs.aircraft.instance.airfoils[t].object3d._scale = [0,0,0];
+                                for (var t in window.geofs.aircraft.instance.airfoils) {
+                                    if (window.geofs.aircraft.instance.airfoils[t].name.toLowerCase().includes("aileron")) {
+                                        window.geofs.aircraft.instance.airfoils[t].object3d._scale = [0,0,0];
                                     }
                                 }
                             }),1000);
                         }
                         break;
-                        //Left elevator: geofs.aircraft.instance.definition.parts[51].object3d._scale = [0,0,0];
-                        //Right elevator: geofs.aircraft.instance.definition.parts[52].object3d._scale = [0,0,0];
+                        //Left elevator: window.geofs.aircraft.instance.definition.parts[51].object3d._scale = [0,0,0];
+                        //Right elevator: window.geofs.aircraft.instance.definition.parts[52].object3d._scale = [0,0,0];
                     case "elevators":
                         alert("Flight control failure (elevators)");
                         if (!this.fails.flightCtrl.elevators) {
                             this.fails.flightCtrl.elevators = true;
                             this.failures.push(setInterval(() => {
-                                for (var t in geofs.aircraft.instance.airfoils) {
-                                    if (geofs.aircraft.instance.airfoils[t].name.toLowerCase().includes("elevator")) {
-                                        geofs.aircraft.instance.airfoils[t].object3d._scale = [0,0,0];
+                                for (var t in window.geofs.aircraft.instance.airfoils) {
+                                    if (window.geofs.aircraft.instance.airfoils[t].name.toLowerCase().includes("elevator")) {
+                                        window.geofs.aircraft.instance.airfoils[t].object3d._scale = [0,0,0];
                                     }
                                 }
                             }),1000);
@@ -195,9 +195,9 @@ class Failure {
                         if (!this.fails.flightCtrl.rudder) {
                             this.fails.flightCtrl.rudder = true;
                             this.failures.push(setInterval(() => {
-                                for (var t in geofs.aircraft.instance.airfoils) {
-                                    if (geofs.aircraft.instance.airfoils[t].name.toLowerCase().includes("rudder")) {
-                                        geofs.aircraft.instance.airfoils[t].object3d._scale = [0,0,0];
+                                for (var t in window.geofs.aircraft.instance.airfoils) {
+                                    if (window.geofs.aircraft.instance.airfoils[t].name.toLowerCase().includes("rudder")) {
+                                        window.geofs.aircraft.instance.airfoils[t].object3d._scale = [0,0,0];
                                     }
                                 }
                             }),1000);
@@ -206,7 +206,7 @@ class Failure {
 
                         //Electrical:
                         //for (var i = 1; i <= 5; i++) {
-                        //geofs.aircraft.instance.cockpitSetup.parts[i].object3d._scale = [0,0,0];
+                        //window.geofs.aircraft.instance.cockpitSetup.parts[i].object3d._scale = [0,0,0];
                         //}
                         //instruments.hide();
                     case "electrical":
@@ -215,9 +215,9 @@ class Failure {
                             this.fails.electrical = true;
                             this.failures.push(setInterval(() => {
                                 for (var i = 1; i <= 5; i++) {
-                                    geofs.aircraft.instance.cockpitSetup.parts[i].object3d._scale = [0,0,0];
+                                    window.geofs.aircraft.instance.cockpitSetup.parts[i].object3d._scale = [0,0,0];
                                 }
-                                geofs.autopilot.turnOff();
+                                window.geofs.autopilot.turnOff();
                                 instruments.hide();
                             }),1000);
                         }
@@ -235,13 +235,13 @@ class Failure {
                         break;
 
                         //Hydraulic:
-                        //Flaps: controls.flaps.target = Math.floor(Math.random()*(geofs.animation.values.flapsSteps*2));  controls.flaps.delta = 20;
+                        //Flaps: controls.flaps.target = Math.floor(Math.random()*(window.geofs.animation.values.flapsSteps*2));  controls.flaps.delta = 20;
                     case "flaps":
                         if (!this.fails.hydraulic.flaps) {
                             alert("Hydraulic failure (flaps)");
                             this.fails.hydraulic.flaps = true;
                             this.failures.push(setInterval(() => {
-                                controls.flaps.target = Math.floor(0.6822525475345469*(geofs.animation.values.flapsSteps*2)); //0.6822525475345469 is a random number, which keeps things consistent
+                                controls.flaps.target = Math.floor(0.6822525475345469*(window.geofs.animation.values.flapsSteps*2)); //0.6822525475345469 is a random number, which keeps things consistent
                                 controls.flaps.delta = 20;
                             }),1000);
                         }
@@ -273,8 +273,8 @@ class Failure {
                             alert("Cabin depressurization! Get at or below 9,000 ft MSL!");
                             this.fails.pressurization = true;
                             this.failures.push(setInterval(() => {
-                                if (geofs.animation.values.altitude > 9000) {
-                                    weather.definition.turbulences = (geofs.animation.values.altitude - 9000) / 5200; //Dynamically adjust turbulence based on altitude
+                                if (window.geofs.animation.values.altitude > 9000) {
+                                    weather.definition.turbulences = (window.geofs.animation.values.altitude - 9000) / 5200; //Dynamically adjust turbulence based on altitude
                                 } else {
                                     weather.definition.turbulences = 0;
                                 }
@@ -314,7 +314,7 @@ class Failure {
         }
         //this.failures = [];
         this.enabled = false;
-        //geofs.resetFlight();
+        //window.geofs.resetFlight();
     }
 } //End failure class
 window.openFailuresMenu = function() {
@@ -509,7 +509,7 @@ window.openFailuresMenu = function() {
         <button onclick="failure.fail('pressurization')">FAIL</button>
         <h1>Engines</h1>
         `;
-        for (var i = 0; i < geofs.aircraft.instance.engines.length; i++) {
+        for (var i = 0; i < window.geofs.aircraft.instance.engines.length; i++) {
             htmlContent += `
             <h2>Engine ${i+1}</h2>
     <span style="
@@ -548,7 +548,7 @@ window.openFailuresMenu = function() {
         }
     } else {
         window.failuresMenu.hidden = !window.failuresMenu.hidden;
-        if (geofs.aircraft.instance.id !== window.aId) {
+        if (window.geofs.aircraft.instance.id !== window.aId) {
             window.failure.reset();
             window.failure = new Failure();
             htmlContent = `
@@ -729,7 +729,7 @@ window.openFailuresMenu = function() {
         <button onclick="failure.fail('pressurization')">FAIL</button>
         <h1>Engines</h1>
         `;
-            for (i = 0; i < geofs.aircraft.instance.engines.length; i++) {
+            for (i = 0; i < window.geofs.aircraft.instance.engines.length; i++) {
                 htmlContent += `
             <h2>Engine ${i+1}</h2>
     <span style="
@@ -767,7 +767,7 @@ window.mainFailureFunction = function() {
     /*
     Some failures include:
      - Landing gear (nearly half of all aircraft-related failures) //works
-     - Fuel leak (timer, then geofs.aircraft.instance.stopEngine()) //works
+     - Fuel leak (timer, then window.geofs.aircraft.instance.stopEngine()) //works
      - Flight control //works
      - Electrical //
      - Structural (weather.definition.turbulences = 5) //Y
@@ -781,7 +781,7 @@ window.mainFailureFunction = function() {
 };
 function waitForEntities() {
     try {
-        if (geofs.cautiousWithTerrain == false) {
+        if (window.geofs.cautiousWithTerrain == false) {
             // Entities are already defined, no need to wait
             window.mainFailureFunction();
             return;
