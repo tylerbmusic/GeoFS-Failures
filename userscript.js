@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GeoFS Failures
-// @version      0.2
+// @version      0.3
 // @description  Adds the ability for systems to fail
 // @author       GGamerGGuy
 // @match        https://www.geo-fs.com/geofs.php?v=*
@@ -92,11 +92,10 @@ class Failure {
                         startRotation: "random",
                         texture: "whitesmoke"
                     });
-                    var p = setInterval(() => {window.geofs.fx.setParticlesColor(new Cesium.Color(0.25,0.25,0.25,1));},20);
+                    var p = setInterval(() => {window.geofs.fx.setParticlesColor(new Cesium.Color(0.1,0.1,0.1,1));},20);
                 }
             }
             if (!system.includes("engine")) {
-                var z = 0;
                 switch(system) {
                     case "fuelLeak":
                         if (!this.fails.fuelLeak) {
@@ -116,7 +115,7 @@ class Failure {
                             alert("Nose gear failure");
                             this.fails.landingGear.front = true;
                             var fG = 2;
-                            for (z = 0; z < window.geofs.aircraft.instance.suspensions.length; z++) {
+                            for (i = 0; i < window.geofs.aircraft.instance.suspensions.length; i++) {
                                 if (window.geofs.aircraft.instance.suspensions[i].name.includes("front") || window.geofs.aircraft.instance.suspensions[i].name.includes("nose") || window.geofs.aircraft.instance.suspensions[i].name.includes("tail")) {
                                     fG = i;
                                 }
@@ -132,7 +131,7 @@ class Failure {
                             alert("Left gear failure");
                             this.fails.landingGear.left = true;
                             var lG = 0;
-                            for (z = 0; z < window.geofs.aircraft.instance.suspensions.length; z++) {
+                            for (i = 0; i < window.geofs.aircraft.instance.suspensions.length; i++) {
                                 if (window.geofs.aircraft.instance.suspensions[i].name.includes("left") || window.geofs.aircraft.instance.suspensions[i].name.includes("l")) {
                                     lG = i;
                                 }
@@ -148,7 +147,7 @@ class Failure {
                         if (!this.fails.landingGear.right) {
                             this.fails.landingGear.right = true;
                             var rG = 1;
-                            for (z = 0; z < window.geofs.aircraft.instance.suspensions.length; z++) {
+                            for (i = 0; i < window.geofs.aircraft.instance.suspensions.length; i++) {
                                 if (window.geofs.aircraft.instance.suspensions[i].name.includes("right") || window.geofs.aircraft.instance.suspensions[i].name.includes("r_g")) {
                                     rG = i;
                                 }
@@ -335,7 +334,7 @@ window.openFailuresMenu = function() {
         <div style="position: fixed; width: 640px; height: 10px; background: lightgray; cursor: move;" id="dragPart"></div>
         <p style="cursor: pointer;right: 0px;position: absolute;background: gray;height: fit-content;" onclick="window.failuresMenu.hidden=true;">X</p>
     <p>Note: Some failures may require a manual refresh of the page.</p>
-    <button onclick="(function(){window.failure.enabled=true; window.failure.tick();})();">Enable</button>
+    <button id="enBtn" onclick="(function(){window.failure.enabled=true; window.failure.tick(); document.getElementById('enBtn').hidden = true;})();">Enable</button>
     <button onclick="window.failure.reset()">RESET ALL</button>
         <h1>Landing Gear</h1>
         <h2>Front</h2>
@@ -555,7 +554,7 @@ window.openFailuresMenu = function() {
         <div style="position: fixed; width: 640px; height: 10px; background: lightgray; cursor: move;" id="dragPart"></div>
         <p style="cursor: pointer;right: 0px;position: absolute;background: gray;height: fit-content;" onclick="window.failuresMenu.hidden=true;">X</p>
     <p>Note: Some failures may require a manual refresh of the page.</p>
-    <button onclick="(function(){window.failure.enabled=true; window.failure.tick();})();">Enable</button>
+    <button id="enBtn" onclick="(function(){window.failure.enabled=true; window.failure.tick(); document.getElementById('enBtn').hidden = true;})();">Enable</button>
     <button onclick="window.failure.reset()">RESET ALL</button>
         <h1>Landing Gear</h1>
         <h2>Front</h2>
