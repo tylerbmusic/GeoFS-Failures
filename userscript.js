@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GeoFS Failures
-// @version      0.3
+// @version      0.3.1
 // @description  Adds the ability for systems to fail
 // @author       GGamerGGuy
 // @match        https://www.geo-fs.com/geofs.php?v=*
@@ -92,7 +92,7 @@ class Failure {
                         startRotation: "random",
                         texture: "whitesmoke"
                     });
-                    var p = setInterval(() => {window.geofs.fx.setParticlesColor(new Cesium.Color(0.1,0.1,0.1,1));},20);
+                    var p = setInterval(() => {window.geofs.fx.setParticlesColor(new window.Cesium.Color(0.1,0.1,0.1,1));},20);
                 }
             }
             if (!system.includes("engine")) {
@@ -217,7 +217,7 @@ class Failure {
                                     window.geofs.aircraft.instance.cockpitSetup.parts[i].object3d._scale = [0,0,0];
                                 }
                                 window.geofs.autopilot.turnOff();
-                                instruments.hide();
+                                window.instruments.hide();
                             }),1000);
                         }
                         break;
@@ -228,7 +228,7 @@ class Failure {
                             console.log("Boeing, am I right?");
                             this.fails.structural = true;
                             this.failures.push(setInterval(() => {
-                                weather.definition.turbulences = 3;
+                                window.weather.definition.turbulences = 3;
                             }),1000);
                         }
                         break;
@@ -240,8 +240,8 @@ class Failure {
                             alert("Hydraulic failure (flaps)");
                             this.fails.hydraulic.flaps = true;
                             this.failures.push(setInterval(() => {
-                                controls.flaps.target = Math.floor(0.6822525475345469*(window.geofs.animation.values.flapsSteps*2)); //0.6822525475345469 is a random number, which keeps things consistent
-                                controls.flaps.delta = 20;
+                                window.controls.flaps.target = Math.floor(0.6822525475345469*(window.geofs.animation.values.flapsSteps*2)); //0.6822525475345469 is a random number, which keeps things consistent
+                                window.controls.flaps.delta = 20;
                             }),1000);
                         }
                         break;
@@ -251,7 +251,7 @@ class Failure {
                             alert("Hydraulic failure (brakes)");
                             this.fails.hydraulic.brakes = true;
                             this.failures.push(setInterval(() => {
-                                controls.brakes = 0;
+                                window.controls.brakes = 0;
                             }),500);
                         }
                         break;
@@ -261,8 +261,8 @@ class Failure {
                             alert("Hydraulic failure (spoilers)");
                             this.fails.hydraulic.spoilers = true;
                             this.failures.push(setInterval(() => {
-                                controls.spoilers.target = 0.2;
-                                controls.spoilers.delta = 20;
+                                window.controls.spoilers.target = 0.2;
+                                window.controls.spoilers.delta = 20;
                             }),1000);
                         }
                         break;
@@ -273,9 +273,9 @@ class Failure {
                             this.fails.pressurization = true;
                             this.failures.push(setInterval(() => {
                                 if (window.geofs.animation.values.altitude > 9000) {
-                                    weather.definition.turbulences = (window.geofs.animation.values.altitude - 9000) / 5200; //Dynamically adjust turbulence based on altitude
+                                    window.weather.definition.turbulences = (window.geofs.animation.values.altitude - 9000) / 5200; //Dynamically adjust turbulence based on altitude
                                 } else {
-                                    weather.definition.turbulences = 0;
+                                    window.weather.definition.turbulences = 0;
                                 }
                             }),1000);
                         }
@@ -754,7 +754,7 @@ window.mainFailureFunction = function() {
     window.failBtn.style.position = 'fixed';
     window.failBtn.style.right = '2%';
     window.failBtn.style.padding = '10px';
-    window.failBtn.style.top = '15%';
+    window.failBtn.style.top = '30%';
     window.failBtn.style.border = 'transparent';
     window.failBtn.style.background = 'rgb(0,0,0)';
     window.failBtn.style.color = 'white';
