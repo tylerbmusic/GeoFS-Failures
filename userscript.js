@@ -1,18 +1,21 @@
 // ==UserScript==
 // @name         GeoFS Failures
-// @version      0.3.2
+// @version      0.4
 // @description  Adds the ability for systems to fail
 // @author       GGamerGGuy
 // @match        https://www.geo-fs.com/geofs.php?v=*
 // @match        https://*.geo-fs.com/geofs.php*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=geo-fs.com
 // @grant        none
+// @downloadURL  https://github.com/tylerbmusic/GeoFS-Failures/raw/refs/heads/main/userscript.js
+// @updateURL    https://github.com/tylerbmusic/GeoFS-Failures/raw/refs/heads/main/userscript.js
 // ==/UserScript==
 class Failure {
     constructor() {
         this.aId = window.geofs.aircraft.instance.id; //aircraft ID
         this.enabled = false; //Start disabled
         this.failures = []; //Array with all failure intervals
+        this.mcasTime = 0; //A Date.now() for MCAS to use
         this.fails = {
             landingGear: {
                 front: false,
@@ -34,7 +37,8 @@ class Failure {
             },
             pitotStatic: false,
             pressurization: false,
-            engines: []
+            engines: [],
+            mcas: false
         } //End fails
         for (var i = 0; i < window.geofs.aircraft.instance.engines.length; i++) {
             this.fails.engines.push({i: false});
@@ -60,7 +64,8 @@ class Failure {
             },
             pitotStatic: 0,
             pressurization: 0,
-            engines: []
+            engines: [],
+            mcas: 0
         } //End chances
         for (var v = 0; v < window.geofs.aircraft.instance.engines.length; v++) {
             this.chances.engines.push({v: 0});
@@ -122,7 +127,7 @@ class Failure {
                         }
                         this.failures.push(setInterval(() => {
                             window.geofs.aircraft.instance.suspensions[fG].collisionPoints[0][2] = 30;
-                        }),1000);
+                        },1000));
                     }
                     break;
                     //Left landing gear failure:
@@ -138,7 +143,7 @@ class Failure {
                         }
                         this.failures.push(setInterval(() => {
                             window.geofs.aircraft.instance.suspensions[lG].collisionPoints[0][2] = 30;
-                        }),1000);
+                        },1000));
                     }
                     break;
                     //Right landing gear failure:
@@ -154,7 +159,7 @@ class Failure {
                         }
                         this.failures.push(setInterval(() => {
                             window.geofs.aircraft.instance.suspensions[rG].collisionPoints[0][2] = 30;
-                        }),1000);
+                        },1000));
                     }
                     break;
 
@@ -171,7 +176,7 @@ class Failure {
                                     window.geofs.aircraft.instance.airfoils[t].object3d._scale = [0,0,0];
                                 }
                             }
-                        }),1000);
+                        },1000));
                     }
                     break;
                     //Left elevator: window.geofs.aircraft.instance.definition.parts[51].object3d._scale = [0,0,0];
@@ -186,7 +191,7 @@ class Failure {
                                     window.geofs.aircraft.instance.airfoils[t].object3d._scale = [0,0,0];
                                 }
                             }
-                        }),1000);
+                        },1000));
                     }
                     break;
                 case "rudder":
@@ -199,7 +204,7 @@ class Failure {
                                     window.geofs.aircraft.instance.airfoils[t].object3d._scale = [0,0,0];
                                 }
                             }
-                        }),1000);
+                        },1000));
                     }
                     break;
 
@@ -218,7 +223,7 @@ class Failure {
                             }
                             window.geofs.autopilot.turnOff();
                             window.instruments.hide();
-                        }),1000);
+                        },1000));
                     }
                     break;
 
@@ -229,7 +234,7 @@ class Failure {
                         this.fails.structural = true;
                         this.failures.push(setInterval(() => {
                             window.weather.definition.turbulences = 3;
-                        }),1000);
+                        },1000));
                     }
                     break;
 
@@ -242,7 +247,7 @@ class Failure {
                         this.failures.push(setInterval(() => {
                             window.controls.flaps.target = Math.floor(0.6822525475345469*(window.geofs.animation.values.flapsSteps*2)); //0.6822525475345469 is a random number, which keeps things consistent
                             window.controls.flaps.delta = 20;
-                        }),1000);
+                        },1000));
                     }
                     break;
                     //Brakes: controls.brakes = 0;
@@ -252,7 +257,7 @@ class Failure {
                         this.fails.hydraulic.brakes = true;
                         this.failures.push(setInterval(() => {
                             window.controls.brakes = 0;
-                        }),500);
+                        },500));
                     }
                     break;
                     //Spoilers: controls.airbrakes.target = Math.round(Math.random()*20)/10;  controls.airbrakes.delta = 20;
@@ -263,7 +268,7 @@ class Failure {
                         this.failures.push(setInterval(() => {
                             window.controls.airbrakes.target = 0.2;
                             window.controls.airbrakes.delta = 20;
-                        }),1000);
+                        },1000));
                     }
                     break;
 
@@ -278,6 +283,30 @@ class Failure {
                                 window.weather.definition.turbulences = 0;
                             }
                         }),1000);
+                    }
+                    break;
+                case "mcas":
+                    if (!this.fails.mcas) { //No alert since there was no MCAS failure detection on the 737 max
+                        this.fails.mcas = true;
+                        this.mcasTime = Date.now();
+                        this.mcasRandT = Math.floor(Math.random()*10000);
+                        this.mcasActive = true;
+                        window.controls.elevatorTrimMin = -10;
+                        this.failures.push(setInterval(() => {
+                            if (!window.geofs.autopilot.on && window.controls.flaps.position == 0 && this.fails.mcas) {
+                                if (this.mcasActive && (Date.now() <= this.mcasTime+this.mcasRandT)) { //Active for up to 10 seconds
+                                    window.controls.elevatorTrim > window.controls.elevatorTrimMin && (window.controls.elevatorTrim -= window.controls.elevatorTrimStep/10); //Trim down slowly
+                                } else if (this.mcasActive) { //After up to 10 seconds, MCAS pauses for 5 seconds
+                                    this.mcasActive = false;
+                                    this.mcasTime += this.mcasRandT;
+                                    this.mcasRandT = Math.floor(Math.random()*10000);
+                                } else if (!this.mcasActive && (Date.now() >= this.mcasTime+5000)) { //After 5 seconds, MCAS activates again and the cycle continues
+                                    this.mcasActive = true;
+                                    this.mcasTime += 5000;
+                                    window.controls.elevatorTrim > window.controls.elevatorTrimMin && (window.controls.elevatorTrim -= window.controls.elevatorTrimStep/10); //Trim down slowly
+                                }
+                            }
+                        }, 40));
                     }
                     break;
             } //End system switch
@@ -506,6 +535,18 @@ window.openFailuresMenu = function() {
     width: 40px;
 ">
         <button onclick="failure.fail('pressurization')">FAIL</button>
+        <h1>MCAS</h1>
+    <span style="
+    font-size: large;
+    vertical-align: top;
+">Chance per minute: </span>
+        <input type="range" min="0" max="1" step="0.01" id="slideMCAS" onchange="[document.getElementById('inputMCAS').value, window.failure.chances.mcas]=[document.getElementById('slideMCAS').valueAsNumber, document.getElementById('slideMCAS').valueAsNumber]" draggable="false" style="
+    vertical-align: bottom;
+">
+        <input disabled="true;" id="inputMCAS" style="
+    width: 40px;
+">
+        <button onclick="failure.fail('mcas')">FAIL</button>
         <h1>Engines</h1>
         `;
         for (var i = 0; i < window.geofs.aircraft.instance.engines.length; i++) {
@@ -726,6 +767,18 @@ window.openFailuresMenu = function() {
     width: 40px;
 ">
         <button onclick="failure.fail('pressurization')">FAIL</button>
+        <h1>MCAS</h1>
+    <span style="
+    font-size: large;
+    vertical-align: top;
+">Chance per minute: </span>
+        <input type="range" min="0" max="1" step="0.01" id="slideMCAS" onchange="[document.getElementById('inputMCAS').value, window.failure.chances.mcas]=[document.getElementById('slideMCAS').valueAsNumber, document.getElementById('slideMCAS').valueAsNumber]" draggable="false" style="
+    vertical-align: bottom;
+">
+        <input disabled="true;" id="inputMCAS" style="
+    width: 40px;
+">
+        <button onclick="failure.fail('mcas')">FAIL</button>
         <h1>Engines</h1>
         `;
             for (i = 0; i < window.geofs.aircraft.instance.engines.length; i++) {
